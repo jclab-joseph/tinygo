@@ -172,15 +172,6 @@ func Chown(path string, uid, gid int) (err error) {
 	return
 }
 
-func Lchown(path string, uid, gid int) (err error) {
-	data := cstring(path)
-	fail := int(libc_lchown(&data[0], uid, gid))
-	if fail < 0 {
-		err = getErrno()
-	}
-	return
-}
-
 func Fork() (err error) {
 	fail := int(libc_fork())
 	if fail < 0 {
@@ -224,11 +215,7 @@ func Truncate(path string, length int64) (err error) {
 func Faccessat(dirfd int, path string, mode uint32, flags int) (err error)
 
 func Kill(pid int, sig Signal) (err error) {
-	result := libc_kill(int32(pid), int32(sig))
-	if result < 0 {
-		err = getErrno()
-	}
-	return
+	return ENOSYS // TODO
 }
 
 type SysProcAttr struct{}
@@ -381,11 +368,6 @@ func libc_chmod(pathname *byte, mode uint32) int32
 //export chown
 func libc_chown(pathname *byte, owner, group int) int32
 
-// int lchown(const char *pathname, uid_t owner, gid_t group);
-//
-//export lchown
-func libc_lchown(pathname *byte, owner, group int) int32
-
 // int mkdir(const char *pathname, mode_t mode);
 //
 //export mkdir
@@ -440,8 +422,3 @@ func libc_execve(filename *byte, argv **byte, envp **byte) int
 //
 //export truncate
 func libc_truncate(path *byte, length int64) int32
-
-// int kill(pid_t pid, int sig);
-//
-//export kill
-func libc_kill(pid, sig int32) int32
